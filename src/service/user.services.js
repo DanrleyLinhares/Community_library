@@ -11,6 +11,27 @@ async function createUserService(newUser) {
     return user;
 }
 
+async function findAllUsersService() {
+    const users = await userRepositories.findAllUserRepository();
+    return users;
+}
+
+async function findUserByIdService(id) {
+    const user = await userRepositories.findUserByIdRepository(id)
+    if (!user) throw new Error("User not found");
+    return user
+}
+
+async function updateUserService(newUser, userId) {
+    const user = await userRepositories.findUserByIdRepository(userId);
+    if (!user) throw new Error("User not found");
+    if (newUser.password) {
+        newUser.password = await bcrypt.hash(newUser.password, 10)
+    }
+    const userUpdated = userRepositories.updateUserRepository(userId, newUser)
+    return userUpdated
+}
+
 export default {
-    createUserService
+    createUserService, findAllUsersService, findUserByIdService, updateUserService
 }

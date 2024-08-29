@@ -1,10 +1,20 @@
 import jwt from 'jsonwebtoken'
+import "dotenv/config"
+import userRepositories from '../repositories/user.repositories.js'
+import bcrypt from 'bcrypt';
 
 function generateJWT(id) {
-    return jwt.sign({id}, '87e71f18096f5ce5e56fdaa9ba8c2d09866b110ad67fa20c86112f5489595f08',
-        {expiresIn: 86400}
-    )
+    return jwt.sign({id}, process.env.SECRET_JWT,
+        {expiresIn: '24h'});
+}
+
+async function loginService(email, password) {
+    const user = await userRepositories.findUserByEmailRepository(email);
+    if (!user) throw new Error ('Invalid user!')
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) throw new Error('Invalid User!');
+    return generateJWT(user.id)
 }
 
 
-export { generateJWT };
+export { generateJWT, loginService };
